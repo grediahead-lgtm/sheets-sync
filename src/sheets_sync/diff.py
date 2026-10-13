@@ -26,6 +26,10 @@ def index(rows, key):
 
 
 def diff(old_rows, new_rows, key="sku", watch=("price", "stock")):
+    if new_rows:
+        missing = [c for c in watch if c not in new_rows[0]]
+        if missing:  # a typo in --watch must not look like "nothing changed"
+            raise ValueError("watched columns not found in the new file: %s. Found: %s" % (", ".join(missing), ", ".join(new_rows[0])))
     old, p1 = index(old_rows, key)
     new, p2 = index(new_rows, key)
     added = [new[k] for k in new if k not in old]

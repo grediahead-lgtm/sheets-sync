@@ -33,8 +33,13 @@ class DiffTests(unittest.TestCase):
     def test_whitespace_is_not_a_change_and_watch_columns(self):
         a = [{"sku": "1", "price": "10", "name": "x"}]
         b = [{"sku": "1", "price": " 10 ", "name": "y"}]
-        self.assertEqual(diff(a, b)["changed"], [])  # name is not watched
+        self.assertEqual(diff(a, b, watch=("price",))["changed"], [])  # name is not watched
         self.assertEqual(len(diff(a, b, watch=("name",))["changed"]), 1)
+
+    def test_unknown_watch_column_is_an_error_not_silence(self):
+        with self.assertRaises(ValueError) as cm:
+            diff(OLD, NEW, watch=("prise",))
+        self.assertIn("prise", str(cm.exception))
 
     def test_empty_and_repeated_keys_reported(self):
         idx, problems = index([{"sku": ""}, {"sku": "a"}, {"sku": "a"}], "sku")
